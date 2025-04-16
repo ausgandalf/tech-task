@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
@@ -23,9 +26,19 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        // Ensure 'public' disk is faked if you're using this in tests
+        $fakeSelfie = UploadedFile::fake()->image('selfie.jpg');
+        $path = $fakeSelfie->store('selfies', 'public');
+        
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->firstName,
+            'surname' => $this->faker->lastName,
+            'email' => $this->faker->unique()->safeEmail,
+            'phone' => $this->faker->phoneNumber,
+            'country' => $this->faker->countryCode,
+            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
+            'selfie' => $path,
+            'introduction' => $this->faker->paragraph,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
